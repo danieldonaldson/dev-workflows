@@ -1,0 +1,76 @@
+# Small manifest patterns, each fixing a bug that only showed up from cold start or over time.
+# Notes: ~/notes/atomic/Dev/Kubernetes platform patterns.md
+---
+# 1) CR instance whose CRD is installed by ANOTHER ArgoCD app (ServiceMonitor, Certificate,
+#    CNPG Cluster...). Without these, a from-scratch sync deadlocks at wave 0.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: example
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"   # strictly after the wave that installs the CRD
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+---
+# 2) CronJob whose failures feed an alert. Without a TTL one transient failure latches
+#    kube_job_status_failed on until 3 newer failures evict it. Keep staleness alerts too.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: example-backup
+spec:
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 172800   # ~8 runs: long enough to read logs, short enough to clear
+      backoffLimit: 2
+      activeDeadlineSeconds: 1800
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: job
+              image: REPLACE
+---
+# 3) Anything bound to a singleton (hostPort, RWO volume) cannot surge. Default
+#    maxSurge:1/maxUnavailable:0 leaves the new pod Pending forever and the old one serving.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: { app.kubernetes.io/name: edge }   # IMMUTABLE once created — keep it minimal
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: edge }
+    spec:
+      containers:
+        - name: edge
+          image: REPLACE
+          ports: [{ containerPort: 443, hostPort: 443 }]
+---
+# 4) CNPG prod cluster: bootstrap by RECOVERY from a read-only store over the off-site copy.
+#    initdb under GitOps silently recreates an empty DB on rebuild (and collides WAL timelines).
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: app-db
+spec:
+  instances: 1
+  bootstrap:
+    recovery:
+      source: app-db-offsite        # no recoveryTarget: newest complete base backup wins
+      database: app
+      owner: app
+  externalClusters:
+    - name: app-db-offsite
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: offsite-readonly   # an ObjectStore with NO archiver configured
+          serverName: app-db                   # the SOURCE cluster's name, not this one's

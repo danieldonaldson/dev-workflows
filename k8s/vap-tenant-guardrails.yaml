@@ -1,0 +1,109 @@
+# Origin: toutouwai k8s/apps/base/agents/vap.yaml (genericised). Bind with a
+# ValidatingAdmissionPolicyBinding (validationActions: [Deny]) scoped to the tenant namespace,
+# paramRef -> the tenant-admission-params ConfigMap. Test with known-bad manifests.
+#
+# ValidatingAdmissionPolicy for the tenant namespace — chosen over
+# Kyverno (built-in, CEL, no controller; GA since K8s 1.30). The provisioner creates
+# workloads programmatically here, so admission is the guardrail against provisioner
+# bugs. Four rules, parameterised by the tenant-admission-params ConfigMap:
+#
+#   1. runtimeClassName is one of the approved gVisor classes (unless requireGvisor=false →
+#      runc+userns fallback, which then requires hostUsers == false as its isolation control).
+#      There is one class per tier (gvisor-nest/-fledgling/-aerie) because `overhead.podFixed`
+#      is a RuntimeClass property that a pod may not override — see the runtimeclass-gvisor.yaml
+#      header. The list is fail-closed the same way the image prefixes are: empty entries are
+#      filtered out, and an empty effective list admits NOTHING.
+#   2. automountServiceAccountToken == false
+#   3. every container/initContainer/ephemeralContainer image starts with an approved,
+#      NON-EMPTY registry prefix (empty prefixes are filtered out so they can never
+#      match — an empty prefix would make startsWith('') admit ANY image; the effective
+#      prefix list is fail-closed: if it filters down to nothing, NO image passes)
+#   4. the pod carries `app.kubernetes.io/part-of: tenant-workload` — the label every agent
+#      CiliumNetworkPolicy selects on. A pod without it matches no policy and falls back
+#      to default-allow (can reach the metadata IP / cluster pods), so admission requires
+#      it here rather than trusting the provisioner to always set it.
+#
+# Matches Pods (the real boundary — the provisioner's Deployment→ReplicaSet→Pod ends in
+# a Pod create) AND Deployments (fast rejection at `kubectl apply` time). The `podSpec`
+# and `podLabels` variables normalise the two shapes; they branch on
+# `request.resource.resource` (the reliable admission-request field) rather than
+# `object.kind`, which can be empty on some admission paths — an empty kind would send a
+# Pod CREATE down the Deployment (`spec.template`) branch, CEL-error, and with
+# failurePolicy: Fail deny ALL agent pod creation. Bound to `agents` via vap-binding.yaml.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: tenant-guardrails
+spec:
+  failurePolicy: Fail
+  paramKind:
+    apiVersion: v1
+    kind: ConfigMap
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods", "pods/ephemeralcontainers"]
+      - apiGroups: ["apps"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["deployments"]
+  variables:
+    # Discriminate Pod vs Deployment on the admission request's resource (always populated
+    # for these resourceRules: pods, pods/ephemeralcontainers → 'pods'; deployments →
+    # 'deployments'), NOT object.kind (TypeMeta.kind can be empty on some admission paths).
+    - name: podSpec
+      expression: "request.resource.resource == 'pods' ? object.spec : object.spec.template.spec"
+    # Pod-level labels, normalised the same way — a Pod carries them at metadata.labels, a
+    # Deployment at spec.template.metadata.labels (the pod template, not the Deployment itself).
+    - name: podLabels
+      expression: "request.resource.resource == 'pods' ? object.metadata.labels : object.spec.template.metadata.labels"
+    - name: requireGvisor
+      expression: "!has(params.data) || !('requireGvisor' in params.data) || params.data['requireGvisor'] == 'true'"
+    # Approved sandbox classes (comma-separated). One per tier: the provisioner sets
+    # `gvisor-<tier>` so each tier gets its own overhead.podFixed, which is only settable on
+    # the RuntimeClass (a pod carrying a mismatched spec.overhead is rejected outright). The
+    # generic `gvisor` stays admitted for the non-agent sandboxed pods in this namespace
+    # (netcheck / VAP fixtures). Empty entries are filtered out so a stray trailing comma
+    # cannot widen the list, and an empty effective list admits nothing.
+    - name: allowedRuntimeClasses
+      expression: "((has(params.data) && 'allowedRuntimeClasses' in params.data && params.data['allowedRuntimeClasses'] != '') ? params.data['allowedRuntimeClasses'] : 'gvisor').split(',').filter(c, c != '')"
+    - name: allowedPrefix
+      expression: "(has(params.data) && 'allowedImagePrefix' in params.data) ? params.data['allowedImagePrefix'] : 'REGISTRY/PREFIX-'"
+    # Additional accepted prefixes (comma-separated), empty by default so prod is
+    # unchanged. A local overlay sets this to admit locally-built images pushed to
+    # the in-cluster registry (e.g. 10.5.0.1:5000/hermes-) alongside the ghcr prefix.
+    - name: extraAllowedPrefixes
+      expression: "(has(params.data) && 'extraAllowedImagePrefixes' in params.data && params.data['extraAllowedImagePrefixes'] != '') ? params.data['extraAllowedImagePrefixes'].split(',') : []"
+    # Effective allow-list = the primary prefix plus the split extras, with EMPTY elements
+    # removed. Without this filter a stray '' (trailing comma in extraAllowedImagePrefixes,
+    # or allowedImagePrefix: "") would make image.startsWith('') true for every image and
+    # admit anything. Fail-closed: if this list is empty, the exist() below is false for
+    # every image, so NO image passes.
+    - name: effectivePrefixes
+      expression: "([variables.allowedPrefix] + variables.extraAllowedPrefixes).filter(p, p != '')"
+    - name: imageOk
+      expression: "variables.podSpec.containers.all(c, variables.effectivePrefixes.exists(p, c.image.startsWith(p)))"
+    - name: initImagesOk
+      expression: "!has(variables.podSpec.initContainers) || variables.podSpec.initContainers.all(c, variables.effectivePrefixes.exists(p, c.image.startsWith(p)))"
+    - name: ephemeralImagesOk
+      expression: "!has(variables.podSpec.ephemeralContainers) || variables.podSpec.ephemeralContainers.all(c, variables.effectivePrefixes.exists(p, c.image.startsWith(p)))"
+  validations:
+    - expression: "variables.requireGvisor ? (has(variables.podSpec.runtimeClassName) && variables.allowedRuntimeClasses.exists(c, variables.podSpec.runtimeClassName == c)) : (has(variables.podSpec.hostUsers) && variables.podSpec.hostUsers == false)"
+      messageExpression: "'agents pods must set runtimeClassName to one of the approved gVisor classes (' + variables.allowedRuntimeClasses.join(',') + '), or (when requireGvisor=false in tenant-admission-params for the runc fallback) set hostUsers: false for userns isolation'"
+      reason: Forbidden
+    - expression: "has(variables.podSpec.automountServiceAccountToken) && variables.podSpec.automountServiceAccountToken == false"
+      messageExpression: "'agents pods must set automountServiceAccountToken: false'"
+      reason: Forbidden
+    - expression: "variables.imageOk && variables.initImagesOk && variables.ephemeralImagesOk"
+      messageExpression: "'agents pod images must start with the approved registry prefix (' + variables.allowedPrefix + ') or a prefix listed in extraAllowedImagePrefixes'"
+      reason: Forbidden
+    # Network isolation: every agent CiliumNetworkPolicy selects on
+    # app.kubernetes.io/part-of: tenant-workload. A pod missing this label matches no policy
+    # and inherits default-allow (metadata IP / cross-pod reachability), so require the
+    # label at admission — for a Pod it lives at metadata.labels, for a Deployment at
+    # spec.template.metadata.labels (normalised by the podLabels variable above).
+    - expression: "'app.kubernetes.io/part-of' in variables.podLabels && variables.podLabels['app.kubernetes.io/part-of'] == 'tenant-workload'"
+      messageExpression: "'agents pods must carry the label app.kubernetes.io/part-of: tenant-workload so the agent CiliumNetworkPolicies select them (without it the pod falls back to default-allow networking)'"
+      reason: Forbidden

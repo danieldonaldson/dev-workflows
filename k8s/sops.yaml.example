@@ -1,0 +1,8 @@
+# Repo-root .sops.yaml for in-cluster Secret sources. Only data/stringData values are
+# encrypted, so names, namespaces and keys stay readable in diffs. SOPS uses the nearest
+# .sops.yaml, so a subdir (e.g. Talos machine secrets) can carry its own rule.
+creation_rules:
+  - path_regex: secrets\.sops\.ya?ml$
+    encrypted_regex: ^(data|stringData)$
+    age: >-
+      age1REPLACE_WITH_YOUR_PUBLIC_KEY

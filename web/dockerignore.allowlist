@@ -1,0 +1,17 @@
+# .dockerignore as an ALLOWLIST for a frontend image built from a pnpm monorepo root.
+# Everything is excluded unless re-included, so a new top-level dir (k8s/, docs/, secrets/)
+# never joins the build context / cache key by accident. Adjust the ! lines per image.
+*
+!apps/web
+!apps/dashboard
+!packages
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!tsconfig.base.json
+!.npmrc
+**/node_modules
+**/dist
+**/.astro
+**/coverage
+**/test-results
