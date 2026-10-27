@@ -4,11 +4,9 @@ Candidates found while scanning `~/Work` (2026-10-27), roughly by leverage.
 
 ## High
 
-- [ ] **Rust/Axum backend template.** An auth slice was already ported into toutouwai by hand.
-      A template repo with hexagonal layout, auth (Argon2id, RS256, rotating refresh tokens,
-      CSRF, OAuth), `Settings::from_env` with aggregated errors, `persist_err` mapping,
-      leader election, `sqlx::query!` + `.sqlx`, nextest, clippy pedantic, cargo deny/audit,
-      scratch Dockerfile. Sources: `toutouwai/backend`, plus a SQLite variant.
+- [x] **Rust/Axum backend template.** Done as `starters/rust-svelte/` (2026-10-27), from
+      toutouwai's backend + dashboard. Still open: a SQLite variant and a
+      generated-TS-types step (ts-rs or OpenAPI → TS) wired into CI.
 - [ ] **Static site on Cloudflare Workers runbook.**
       `wrangler.jsonc` static assets, `public/_headers`, Custom Domains vs
       Routes (API error 100117 if a record exists), `pnpm run deploy` (bare `pnpm deploy` is a

@@ -9,6 +9,12 @@ Rule of thumb: if it's a decision or a lesson → notes. If you'd copy it into a
 **Starting something new?** Begin with the checklist in the vault: `~/notes/atomic/Dev/Starting a new project.md`.
 It walks through day-one decisions in order and points at the files here.
 
+## Starters
+
+| Path | What |
+|------|------|
+| `starters/rust-svelte/` | Rust/Axum + Astro/Svelte with the full auth slice, tests at every level, Compose (local + single-host prod), optional k8s base, CI. Start here for a new web app. |
+
 ## Contents
 
 | Path | What | Origin |
