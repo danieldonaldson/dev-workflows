@@ -6,6 +6,9 @@ where each lesson is an atomic note; files here link back to them.
 
 Rule of thumb: if it's a decision or a lesson → notes. If you'd copy it into a new repo → here.
 
+**Starting something new?** Begin with the checklist in the vault: `~/notes/atomic/Dev/Starting a new project.md`.
+It walks through day-one decisions in order and points at the files here.
+
 ## Contents
 
 | Path | What | Origin |
