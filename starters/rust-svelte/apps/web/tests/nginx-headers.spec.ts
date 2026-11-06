@@ -14,7 +14,7 @@ import { expect, test } from '@playwright/test'
 // grepping it for a CSP string, does not catch this; only the block structure does.
 //
 // The invariant that makes it impossible: every add_header lives at server level,
-// and per-path Cache-Control is computed by the $ttw_cache_control map instead.
+// and per-path Cache-Control is computed by the $app_cache_control map instead.
 
 const here = dirname(fileURLToPath(import.meta.url))
 const nginxConf = join(here, '..', 'nginx.conf')
@@ -61,7 +61,7 @@ test('no location block declares add_header (it would shadow the server-level on
     offenders,
     'these location blocks declare add_header, which silently drops every ' +
       'server-level security header for the paths they match; express caching ' +
-      'through the $ttw_cache_control map instead',
+      'through the $app_cache_control map instead',
   ).toEqual([])
 })
 

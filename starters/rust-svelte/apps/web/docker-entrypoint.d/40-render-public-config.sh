@@ -6,7 +6,7 @@
 # is writable); nginx serves /config.js from /tmp (see nginx.conf). Runs via the nginx image's
 # /docker-entrypoint.d hook (as uid 101, before nginx starts).
 #
-# Encoding approach (why not envsubst): the previous version ran `envsubst` to drop operator-set
+# Encoding approach (why not envsubst): `envsubst` would drop operator-set
 # PUBLIC_* values straight into single-quoted JS string literals, with zero escaping. A value
 # containing a single quote, backslash, or newline would break out of the string (or inject
 # arbitrary JS). Instead we JSON-encode each value, assemble a JSON object, and emit

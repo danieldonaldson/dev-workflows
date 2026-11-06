@@ -27,7 +27,7 @@ test.describe('reachability', () => {
   test('plain HTTP is redirected to HTTPS, without following it', async ({ request }) => {
     const insecure = APP_BASE_URL.replace(/^https:/, 'http:')
     const res = await request.get(`${insecure}/`, { maxRedirects: 0 })
-    // 308 in production today; 301 is equally acceptable. What must not happen
+    // Edges usually answer 308; 301 is equally acceptable. What must not happen
     // is a 200 — that would mean plaintext is being served.
     expect([301, 302, 307, 308]).toContain(res.status())
     expect(res.headers()['location']).toMatch(/^https:/)

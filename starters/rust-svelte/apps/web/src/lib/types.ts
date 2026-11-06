@@ -2,7 +2,6 @@
 // Shapes mirror the backend's UserResponse / auth DTOs (`/api/v1/...`).
 
 export type UserRole = 'user' | 'admin' | 'super_admin'
-export type UnitSystem = 'metric' | 'imperial'
 export type OAuthProvider = 'google'
 
 /** Whether a role grants admin-panel access (admin or super-admin). */
@@ -22,9 +21,6 @@ export interface User {
   pending_email?: string | null
   pending_email_requested_at?: string | null
   deletion_scheduled_at?: string | null
-  region?: string
-  unit_system?: UnitSystem
-  currency?: string
   role?: UserRole
   created_at?: string
 }
@@ -147,9 +143,6 @@ export interface AccountExportResponse {
   has_password: boolean
   pending_email?: string
   deletion_scheduled_at?: string
-  region: string
-  unit_system: string
-  currency: string
   role: string
   created_at: string
   updated_at: string

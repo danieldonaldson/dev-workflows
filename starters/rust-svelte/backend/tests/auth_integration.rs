@@ -60,7 +60,7 @@ async fn health_check_returns_200(pool: PgPool) {
 #[sqlx::test(migrations = "./migrations")]
 async fn health_probes_are_reachable_under_api_prefix(pool: PgPool) {
     // Health is also mounted under /api/v1 so it routes to the backend through
-    // Traefik's single-origin `/api` rule (the root `/` goes to the frontend).
+    // the edge proxy's single-origin `/api` rule (the root `/` goes to the frontend).
     let app = common::create_test_app(pool);
 
     for uri in ["/api/v1/health", "/api/v1/health/ready"] {

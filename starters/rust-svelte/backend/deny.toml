@@ -1,7 +1,7 @@
 # Configuration for `cargo deny` (run via `just deny` and in CI).
 #
-# This is the cargo-side analogue of the dashboard's pnpm supply-chain policy
-# (`PNPM_CONFIG_MINIMUM_RELEASE_AGE=1440`, see CLAUDE.md): it gates the dependency
+# This is the cargo-side analogue of the frontend's pnpm supply-chain policy
+# (`PNPM_CONFIG_MINIMUM_RELEASE_AGE=1440`, see the justfile): it gates the dependency
 # graph on license, source, and advisory policy rather than re-resolving freely.
 #
 # `cargo audit` (see .cargo/audit.toml) still owns the RustSec CVE scan; this adds

@@ -30,9 +30,9 @@ EXPOSE 8080
 # projects lack node_modules) and triggers a full reinstall at container start — slow, needs
 # npm-registry egress, and re-runs husky. Running the bin skips all pnpm run-time behaviour.
 # WORKDIR = the app dir so astro finds astro.config.mjs; exec form makes astro PID 1 so it
-# receives SIGTERM for a clean stop. --host binds all interfaces (kubelet probe + Traefik);
+# receives SIGTERM for a clean stop. --host binds all interfaces (kubelet probe + ingress);
 # --port matches the Service/probe. HMR clientPort + allowedHosts come from astro.config.mjs,
-# env-driven (HMR_CLIENT_PORT / DEV_ALLOWED_HOSTS set in the local deployment-dev patch).
+# env-driven (HMR_CLIENT_PORT / DEV_ALLOWED_HOSTS set on the dev deployment).
 WORKDIR /repo/apps/web
 CMD ["node_modules/.bin/astro","dev","--host","0.0.0.0","--port","8080"]
 

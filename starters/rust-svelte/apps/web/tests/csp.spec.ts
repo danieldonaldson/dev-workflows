@@ -74,8 +74,7 @@ test('every inline script in the build is pinned by a CSP hash', () => {
 //
 // A CSP that is too TIGHT breaks the product silently, and does it in production
 // rather than in review — a directive that is merely absent looks like nothing at all.
-// (In a previous project, enforcing CSP silently broke an inline payment checkout in
-// production.) So pin the integrations we know we have. Each entry says which directive the origin
+// (Enforcing CSP can silently break an inline payment checkout this way.) So pin the integrations we know we have. Each entry says which directive the origin
 // must appear in, and why — so a future edit that trims one has to argue with a name.
 const REQUIRED_ORIGINS: { origin: string; directives: string[]; why: string }[] = [
   {

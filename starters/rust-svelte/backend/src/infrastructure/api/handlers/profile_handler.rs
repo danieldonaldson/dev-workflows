@@ -138,7 +138,7 @@ fn build_export(
     }
 }
 
-/// Export all personal data held about the authenticated user (GDPR/POPIA).
+/// Export all personal data held about the authenticated user (GDPR).
 #[utoipa::path(
     get,
     path = "/api/v1/users/me/export",

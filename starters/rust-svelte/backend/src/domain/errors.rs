@@ -19,7 +19,6 @@ use thiserror::Error;
 /// | [`DomainError::BusinessRule`] | 422 Unprocessable Entity |
 /// | [`DomainError::Persistence`] | 500 Internal Server Error |
 /// | [`DomainError::ExternalService`] | 502 Bad Gateway |
-/// | [`DomainError::PaymentRequired`] | 402 Payment Required |
 ///
 /// # Examples
 ///
@@ -57,7 +56,7 @@ pub enum DomainError {
     #[error("Conflict: {0}")]
     Conflict(String),
 
-    /// A business rule was violated (e.g., odometer can only increase).
+    /// A business rule was violated (e.g., an account cannot be deleted twice).
     #[error("Business rule violation: {0}")]
     BusinessRule(String),
 
@@ -65,12 +64,7 @@ pub enum DomainError {
     #[error("Persistence error: {0}")]
     Persistence(String),
 
-    /// External service error (e.g., SES, Turnstile, DNS lookup).
+    /// External service error (e.g., SMTP, Turnstile, DNS lookup).
     #[error("External service error: {0}")]
     ExternalService(String),
-
-    /// An active paid subscription is required for the requested action
-    /// (e.g., using a paid feature without an entitling subscription).
-    #[error("Payment required: {0}")]
-    PaymentRequired(String),
 }

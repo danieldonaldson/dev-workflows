@@ -9,10 +9,10 @@
 ///
 /// ```ignore
 /// // With serde support (for types that appear in API responses/requests):
-/// uuid_id!(VehicleId, serde);
+/// uuid_id!(ProjectId, serde);
 ///
 /// // Without serde (for internal-only types):
-/// uuid_id!(MaintenanceEventId);
+/// uuid_id!(AuditEventId);
 /// ```
 macro_rules! uuid_id {
     ($name:ident, serde) => {

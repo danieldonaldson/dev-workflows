@@ -32,7 +32,7 @@ async function collectViolations(page: Page): Promise<Violation[]> {
   return violations
 }
 
-// Known and accepted, documented in the launch plan: Cloudflare JavaScript
+// Known and accepted when the site sits behind Cloudflare: Cloudflare JavaScript
 // Detections injects an inline bootstrap carrying a PER-REQUEST token, so its
 // hash differs on every response and can never be pinned. It is passive bot
 // scoring — the app is unaffected — and the accepted remedy is to switch JSD

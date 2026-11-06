@@ -166,7 +166,7 @@ mod tests {
         assert!(!is_excluded_path("/api/v1/auth/oauth/google/unlink"));
         assert!(!is_excluded_path("/api/v1/auth/oauth/google"));
         assert!(!is_excluded_path("/api/v1/auth/oauth/google/callback"));
-        assert!(!is_excluded_path("/api/v1/vehicles"));
+        assert!(!is_excluded_path("/api/v1/items"));
         assert!(!is_excluded_path("/api/v1/auth/me"));
         assert!(!is_excluded_path("/api/v1/users/profile"));
     }

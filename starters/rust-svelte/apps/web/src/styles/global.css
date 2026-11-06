@@ -7,8 +7,7 @@
 
 /*
  * shadcn-svelte semantic tokens mapped to app's warm brand palette
- * (feather / cloud / pebble / shade / char / brand), so ported shadcn
- * components match the marketing site (apps/web) rather than shadcn neutral.
+ * (feather / cloud / pebble / shade / char / brand) rather than shadcn neutral.
  */
 :root {
   /* One radius language: squircle cards/inputs, pill chips/buttons. */
@@ -27,7 +26,7 @@
   --popover-foreground: #1f1b18;
 
   /* Primary — app brand. Orange fills carry dark (brand-ink) text: white
-     on #d6583d fails AA (3.9:1), dark-on-orange passes (board chip look). */
+     on #d6583d fails AA (3.9:1), dark-on-orange passes. */
   --primary: #d6583d;
   --primary-foreground: #1a120d; /* brand-ink */
 

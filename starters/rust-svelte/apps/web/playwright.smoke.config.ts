@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 
-// Production smoke suite — Part 3 of docs/launch-testing-plan.md, automated.
+// Production smoke suite.
 //
 // Runs against a REAL deployed environment (production by default) and is
 // STRICTLY READ-ONLY: it creates no users, mutates nothing, and sends no
@@ -9,7 +9,7 @@ import { defineConfig, devices } from '@playwright/test'
 //
 // Why a separate config from the other two suites:
 //   - playwright.config.ts          → built dashboard + mocked API (CI gate)
-//   - playwright.integration.config.ts → real backend on the LOCAL cluster
+//   - playwright.integration.config.ts → real backend from `just dev`
 //   - this one                     → a real DEPLOYED environment, over the internet
 //
 // The distinction that matters: the first two prove the code and config are

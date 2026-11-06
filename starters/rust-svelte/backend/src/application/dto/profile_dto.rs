@@ -90,7 +90,7 @@ pub struct LinkedOAuthAccountExport {
 }
 
 /// Machine-readable export of the personal data held about the authenticated
-/// user (GDPR/POPIA data-portability). Returned by
+/// user (GDPR data-portability). Returned by
 /// `GET /api/v1/users/me/export`.
 #[derive(Debug, Serialize, ToSchema)]
 pub struct AccountExportResponse {

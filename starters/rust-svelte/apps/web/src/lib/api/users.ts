@@ -8,8 +8,7 @@ import type {
 import { HttpClient } from './client'
 
 // Password endpoints plus the self-service data-export / account-deletion
-// surface (`/api/v1/users/me*`). Other DML profile/email/locale
-// endpoints still have no backend route in app v1 and are omitted.
+// surface (`/api/v1/users/me*`).
 export function createUsersApi(client: HttpClient) {
   return {
     changePassword: (data: ChangePasswordRequest): Promise<void> =>
@@ -24,7 +23,7 @@ export function createUsersApi(client: HttpClient) {
         body: JSON.stringify(data),
       }),
 
-    /** Download a machine-readable export of all personal data (GDPR/POPIA). */
+    /** Download a machine-readable export of all personal data (GDPR). */
     exportData: (): Promise<AccountExportResponse> =>
       client.request('/users/me/export', { method: 'GET' }),
 

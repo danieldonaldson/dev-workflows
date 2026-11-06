@@ -12,11 +12,13 @@ use std::sync::Arc;
 /// # Brute-force protection (deliberately not here)
 ///
 /// There is intentionally no per-account `failed_login`/`locked_until` counter on
-/// this path. Password login is throttled at the edge — the Traefik `rateLimit`
-/// middleware on `/api/v1/auth/*` plus Cloudflare Turnstile on the form — which suits
+/// this path. Password login is meant to be throttled at the edge — a rate limit on
+/// `/api/v1/auth/*` at your proxy plus Cloudflare Turnstile on the form — which suits
 /// high-entropy, Argon2id-verified passwords. (The low-entropy 6-digit reset/verify
-/// codes keep their own atomic in-app attempt cap; see `verify_email.rs`.) Revisit and
-/// add an in-app per-account/IP lockout if the edge limiter or Turnstile is ever removed.
+/// codes keep their own atomic in-app attempt cap; see `verify_email.rs`.)
+///
+/// The starter's deploy configs ship no edge rate limit and Turnstile is off until
+/// configured: add both before going live, or add an in-app per-account/IP lockout.
 pub struct LoginUserUseCase {
     user_repository: Arc<dyn UserRepository>,
 }

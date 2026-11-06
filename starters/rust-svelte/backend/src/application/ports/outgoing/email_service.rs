@@ -5,7 +5,7 @@ use async_trait::async_trait;
 
 /// Trait for sending transactional emails.
 ///
-/// Implementations handle the actual email delivery (e.g., via AWS SES).
+/// Implementations handle the actual email delivery (e.g., via SMTP).
 #[cfg_attr(any(test, feature = "mocks"), mockall::automock)]
 #[async_trait]
 pub trait EmailService: Send + Sync {

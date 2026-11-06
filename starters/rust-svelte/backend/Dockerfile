@@ -46,7 +46,7 @@ RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
 
 # ── Dev stage: fast incremental inner loop for Tilt (NOT built by CI) ────────────
 # CI/`just build-backend` build the default (last) stage, so this one only runs when a
-# builder explicitly targets it. Tilt does (deploy/k8s/Tiltfile, optional), driving it with
+# builder explicitly targets it. Tilt does, if you add a Tiltfile, driving it with
 # live_update: source is synced into the RUNNING container and cargo-watch recompiles
 # in place, so /app/target stays warm across edits instead of a from-scratch musl
 # release build + rollout per change. glibc + lld link far faster than the static-musl

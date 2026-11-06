@@ -13,7 +13,7 @@ const TEST_USER = {
 // E2E coverage for the destructive self-service Settings actions — data export,
 // schedule-deletion (with re-auth + "DELETE" confirmation), and
 // cancel-during-grace. These exercise the real `users` API client + SettingsPanel
-// danger-zone flow in the browser, which previously had no E2E coverage.
+// danger-zone flow in the browser.
 test.describe('account data export & deletion', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/api/v1/auth/me', async (route) => {

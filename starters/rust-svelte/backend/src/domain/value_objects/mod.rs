@@ -8,10 +8,6 @@ id_macros::uuid_id!(UserId, serde);
 id_macros::uuid_id!(RefreshTokenId);
 id_macros::uuid_id!(VerificationCodeId);
 id_macros::uuid_id!(ResetCodeId);
-id_macros::uuid_id!(UserAgentId, serde);
-id_macros::uuid_id!(TierChangeId, serde);
-id_macros::uuid_id!(RefundSettlementId, serde);
-id_macros::uuid_id!(RefundAttemptId, serde);
 
 pub mod email;
 

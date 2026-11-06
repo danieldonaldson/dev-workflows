@@ -1,7 +1,7 @@
 //! Use case for exporting a user's personal data.
 //!
 //! Assembles the personal data the system holds about a user — their profile and
-//! linked OAuth accounts — for the GDPR/POPIA data-portability right. Returns the
+//! linked OAuth accounts — for the GDPR data-portability right. Returns the
 //! domain entities; the handler maps them to the machine-readable response DTO.
 
 use std::sync::Arc;

@@ -29,11 +29,10 @@ const SEND_TIMEOUT: Duration = Duration::from_secs(8);
 /// Implicit-TLS submission port (SMTPS). [`SmtpEmailService::new`] picks the TLS
 /// mode from the port so the two can never disagree.
 ///
-/// Deployments use STARTTLS on 587, not this: Hetzner blocks outbound 465 from the
-/// prod node to every destination, so implicit-TLS submission cannot leave the
-/// cluster at all. Kept because the port→mode mapping is what stops a future
-/// `SMTP_PORT` change from silently pairing a port with the wrong TLS mode — the
-/// bug that made `POST /auth/register` hang until it timed out.
+/// Prefer STARTTLS on 587: some cloud hosts block outbound 465 entirely, so
+/// implicit-TLS submission cannot leave the server. Kept because the port→mode
+/// mapping is what stops a future `SMTP_PORT` change from silently pairing a port
+/// with the wrong TLS mode, which makes `POST /auth/register` hang until it times out.
 const SMTPS_PORT: u16 = 465;
 
 /// `List-Unsubscribe` header (RFC 2369).

@@ -1,18 +1,13 @@
 /*
- * @app/design-tokens — single source of truth for cross-app design tokens.
+ * @app/design-tokens — single source of truth for shared design tokens.
  *
- * Imported by both apps/web and apps/dashboard after `@import "tailwindcss"`.
+ * Imported by apps/web after `@import "tailwindcss"`.
  * Tailwind 4 composes `@theme` across imported CSS, so the brand palette + motion
  * + radius scale below generate utilities (bg-brand, rounded-card, duration-motion,
- * ease-out, …) in both apps with zero build config.
+ * ease-out, …) with zero build config.
  *
- * Values are the previously-duplicated brand/teal palette, VERBATIM — extracting
- * them here is a pure refactor. Motion, easing and the shared radius scale are
- * new, additive tokens; they change nothing until components opt into them.
- *
- * Neutrals (feather/cloud/pebble/shade/char) stay per-app: web drives them as
- * `--color-*` theme tokens, the dashboard maps them onto shadcn semantic tokens,
- * and each app owns its own light/dark switching.
+ * Neutrals (feather/cloud/pebble/shade/char) live in apps/web/src/styles/global.css,
+ * which maps them onto shadcn semantic tokens and owns light/dark switching.
  */
 
 @theme {
@@ -20,7 +15,7 @@
   --color-brand: #d6583d;
   --color-brand-dark: #b0442c;
   --color-brand-light: #f5a182;
-  /* Dark-text-on-orange chip/fill foreground (board pattern; passes AA on brand). */
+  /* Dark-text-on-orange chip/fill foreground (passes AA on brand). */
   --color-brand-ink: #1a120d;
 
   /* Secondary — Teal */
@@ -32,7 +27,7 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
-  /* Shared radius scale (web squircles + pills; dashboard shadcn owns --radius) */
+  /* Shared radius scale (squircles + pills; shadcn owns --radius) */
   --radius-chip: 9999px;
   --radius-tile: 1.25rem;
   --radius-card: 1.5rem;

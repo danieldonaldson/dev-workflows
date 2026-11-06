@@ -43,8 +43,6 @@ pub enum AppError {
     Database(String),
     #[error("External service error: {0}")]
     ExternalService(String),
-    #[error("Payment required: {0}")]
-    PaymentRequired(String),
     #[error("Signup incomplete for: {email}")]
     SignupIncomplete { email: String },
 }
@@ -130,7 +128,6 @@ impl AppError {
             Self::Internal(_) => "internal_error",
             Self::Database(_) => "database_error",
             Self::ExternalService(_) => "external_service_error",
-            Self::PaymentRequired(_) => "payment_required",
             Self::SignupIncomplete { .. } => "signup_incomplete",
         }
     }
@@ -161,7 +158,6 @@ impl From<DomainError> for AppError {
             DomainError::Conflict(msg) => Self::Conflict(msg),
             DomainError::Persistence(msg) => Self::Database(msg),
             DomainError::ExternalService(msg) => Self::ExternalService(msg),
-            DomainError::PaymentRequired(msg) => Self::PaymentRequired(msg),
         }
     }
 }
@@ -308,7 +304,6 @@ impl IntoResponse for AppError {
                 };
                 (StatusCode::BAD_GATEWAY, response_msg)
             }
-            Self::PaymentRequired(msg) => (StatusCode::PAYMENT_REQUIRED, msg.clone()),
             Self::SignupIncomplete { .. } => unreachable!("handled above"),
         };
 
